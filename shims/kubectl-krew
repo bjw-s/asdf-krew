@@ -1,0 +1,38 @@
+#! /usr/bin/env bash
+
+# This script wraps kubectl-krew to run krew
+
+set -euo pipefail
+
+resolve_krew() {
+	local krew_location
+	krew_location="$(search_krew_bin)"
+
+	if ! [ "$krew_location" ]; then
+		echo "asdf-krew couldn't find a suitable krew executable"
+		echo "This is probably a problem with the plugin, please report this issue"
+		exit 1
+	fi
+
+	echo "$krew_location"
+}
+
+search_krew_bin() {
+	local probably_krew
+	probably_krew="$(asdf where krew)/bin/krew"
+
+	if [ -x "$probably_krew" ]; then
+		echo "$probably_krew"
+		return 0
+	fi
+
+	return 1
+}
+
+wrap_krew() {
+	local krew
+	krew=$(resolve_krew)
+	exec "$krew" "$@"
+}
+
+wrap_krew "$@"
